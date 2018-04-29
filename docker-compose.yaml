@@ -46,7 +46,7 @@ services:
     network_mode: host
     ports:
       - "8123:8123"
-    restart: unless-stopped #always
+    restart: on-failure
     volumes:
       - /opt/homeassistant/config:/config
       - /etc/letsencrypt:/etc/letsencrypt:ro
