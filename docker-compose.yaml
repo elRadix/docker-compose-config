@@ -4,30 +4,30 @@ services:
   grafana:
     image: grafana/grafana
     container_name: grafana
-    ports:
-      - 3000:3000
-    volumes:
-      - /opt/grafana:/etc/grafana:rw
-      - /opt/grafana:/var/lib/grafana:rw
-    restart: on-failure
     depends_on:
       influxdb:
         condition: service_healthy
+    ports:
+      - 3000:3000
+    restart: on-failure
+    volumes:
+      - /opt/grafana:/etc/grafana:rw
+      - /opt/grafana:/var/lib/grafana:rw
 
   influxdb:
     image: influxdb
     container_name: influxdb
-    ports:
-      - 8086:8086
-    volumes:
-      - /opt/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
-      - /opt/influxdb:/var/lib/influxdb
-    restart: on-failure
     healthcheck:
       test: ["CMD", "curl", "-sI", "http://127.0.0.1:8086/ping"]
       interval: 30s
       timeout: 1s
       retries: 24
+    ports:
+      - 8086:8086
+    restart: on-failure
+    volumes:
+      - /opt/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
+      - /opt/influxdb:/var/lib/influxdb
 
   homeassistant:
     #image: homeassistant/home-assistant:dev
@@ -55,13 +55,6 @@ services:
   node-red:
     image: nodered/node-red-docker
     container_name: node-red
-    ports:
-      - 1880:1880
-    volumes:
-      - /opt/node-red:/data
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
-    restart: on-failure
     depends_on:
       mosquitto:
         condition: service_started
@@ -72,6 +65,13 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    ports:
+      - 1880:1880
+    restart: on-failure
+    volumes:
+      - /opt/node-red:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
 
   mosquitto:
     image: eclipse-mosquitto
@@ -79,47 +79,56 @@ services:
     user: "1000:1000"
     ports:
       - 1883:1883
+    restart: on-failure
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /opt/mosquitto:/mosquitto/config:ro
       - /opt/mosquitto:/mosquitto/data
-    restart: on-failure
 
   portainer:
     image: portainer/portainer
     container_name: portainer
     ports:
       - 9000:9000
+    restart: on-failure
     volumes:
       - /opt/portainer:/data:rw
       - /var/run/docker.sock:/var/run/docker.sock
-    restart: on-failure
 
   organizr:
     image: lsiocommunity/organizr
     container_name: organizr
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - /opt/organizr:/config:rw
-      - /etc/letsencrypt:/etc/letsencrypt:ro
     environment:
       - PGID=1000
       - PUID=1000
-    restart: on-failure
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1"]
       interval: 30s
       timeout: 10s
       retries: 5
+    ports:
+      - 80:80
+      - 443:443
+    restart: on-failure
+    volumes:
+      - /opt/organizr:/config:rw
+      - /etc/letsencrypt:/etc/letsencrypt:ro
 
   dockermon:
     image: philhawthorne/ha-dockermon
     container_name: dockermon
     ports:
       - 8126:8126
+    restart: on-failure
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /opt/dockermon:/config
+
+  watchtower:
+    image: v2tec/watchtower
+    container_name: watchtower
+    command: --cleanup --label-enable
     restart: on-failure
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./etc/watchtower/config.json:/config.json:ro
