@@ -18,7 +18,9 @@ services:
     restart: on-failure
     volumes:
       - /opt/nginx:/config:rw
-      - /opt/nginx:/etc/nginx/:rw
+      - /opt/nginx:/etc/nginx:rw
+      - /opt/nginx/conf.d:/etc/nginx/conf.d:rw
+      - /opt/nginx/log:/config/log/nginx:rw
       - /etc/letsencrypt:/etc/letsencrypt:ro
 
   grafana:
@@ -42,6 +44,7 @@ services:
       interval: 30s
       timeout: 1s
       retries: 24
+    network_mode: host
     ports:
       - 8086:8086
     restart: on-failure
