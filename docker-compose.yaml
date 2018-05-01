@@ -1,6 +1,26 @@
 version: '2.1'
 services:
 
+  nginx:
+    container_name: nginx
+    image: nginx
+    environment:
+      - NGINX_HOST=home.brianhanifin.com
+      - NGINX_PORT=80
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    ports:
+      - 80:80
+      - 443:443
+    restart: on-failure
+    volumes:
+      - /opt/nginx:/config:rw
+      - /opt/nginx:/etc/nginx/:rw
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+
   grafana:
     image: grafana/grafana
     container_name: grafana
@@ -118,24 +138,24 @@ services:
       - /opt/portainer:/data:rw
       - /var/run/docker.sock:/var/run/docker.sock
 
-  organizr:
-    image: lsiocommunity/organizr
-    container_name: organizr
-    environment:
-      - PGID=1000
-      - PUID=1000
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-    ports:
-      - 80:80
-      - 443:443
-    restart: on-failure
-    volumes:
-      - /opt/organizr:/config:rw
-      - /etc/letsencrypt:/etc/letsencrypt:ro
+  #organizr:
+  #  container_name: organizr
+  #  image: lsiocommunity/organizr
+  #  environment:
+  #    - PGID=1000
+  #    - PUID=1000
+  #  healthcheck:
+  #    test: ["CMD", "curl", "-f", "http://127.0.0.1"]
+  #    interval: 30s
+  #    timeout: 10s
+  #    retries: 5
+  #  ports:
+  #    - 80:80
+  #    - 443:443
+  #  restart: on-failure
+  #  volumes:
+  #    - /opt/organizr:/config:rw
+  #    - /etc/letsencrypt:/etc/letsencrypt:ro
 
   dockermon:
     image: philhawthorne/ha-dockermon
@@ -154,4 +174,4 @@ services:
     restart: on-failure
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./etc/watchtower/config.json:/config.json:ro
+      - /opt/watchtower/config.json:/config.json:ro
