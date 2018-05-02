@@ -165,6 +165,24 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /opt/dockermon:/config
 
+  unifi:
+    image: jacobalberty/unifi:latest
+    container_name: "Unifi"
+    restart: always
+    volumes:
+      - /opt/unifi/data:/unifi/data
+    ports:
+      - 3478:3478/udp
+      - 10001:10001/udp
+      - 6789:6789/tcp
+      - 8080:8080/tcp
+      - 8880:8880/tcp
+      - 8443:8443/tcp
+      - 8843:8843/tcp
+    environment:
+      - TZ=America/New_York
+    network_mode: "host"
+
   watchtower:
     image: v2tec/watchtower
     container_name: watchtower
