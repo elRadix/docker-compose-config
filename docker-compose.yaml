@@ -4,12 +4,9 @@ services:
   nginx:
     container_name: nginx
     image: nginx
-    environment:
-      - NGINX_HOST=home.brianhanifin.com
-      - NGINX_PORT=80
     ports:
-      - 80:80
-      - 443:443
+       - 80:80
+       - 443:443
     restart: on-failure
     volumes:
       - /opt/nginx:/config:rw
@@ -165,12 +162,27 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /opt/dockermon:/config
 
+  #appdaemon:
+  #  container_name: homeassistant_appdaemon
+  #  image: acockburn/appdaemon:latest
+  #  depends_on:
+  #    - homeassistant
+  #  links:
+      # Link ports from home-assistant container
+  #    - homeassistant
+  #  ports:
+  #    - 5050:5050
+  #  restart: on-failure
+  #  volumes:
+  #    - /opt/appdaemon:/conf
+  #    - /etc/localtime:/etc/localtime:ro
+
   unifi:
     image: jacobalberty/unifi:latest
-    container_name: "Unifi"
-    restart: always
-    volumes:
-      - /opt/unifi/data:/unifi/data
+    container_name: "unifi"
+    environment:
+      - TZ=America/Los_Angeles
+    network_mode: "host"
     ports:
       - 3478:3478/udp
       - 10001:10001/udp
@@ -179,9 +191,9 @@ services:
       - 8880:8880/tcp
       - 8443:8443/tcp
       - 8843:8843/tcp
-    environment:
-      - TZ=America/New_York
-    network_mode: "host"
+    restart: on-failure
+    volumes:
+      - /opt/unifi/data:/unifi/data
 
   watchtower:
     image: v2tec/watchtower

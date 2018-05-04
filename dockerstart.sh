@@ -1,3 +1,3 @@
 #!/bin/bash
 cd /opt
-docker-compose up -d
+docker-compose up -d $1
