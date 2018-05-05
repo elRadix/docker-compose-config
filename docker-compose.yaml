@@ -91,7 +91,8 @@ services:
       - /etc/localtime:/etc/localtime:ro
 
   node-red:
-    image: nodered/node-red-docker
+    #image: nodered/node-red-docker
+    image: machinedata/node-red
     container_name: node-red
     depends_on:
       mosquitto:
@@ -108,6 +109,8 @@ services:
     restart: on-failure
     volumes:
       - /opt/node-red:/data
+      #- /usr/src/node-red:/usr/src/node-red
+      #- /usr/bin:/usr/local/bin
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
 
