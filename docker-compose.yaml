@@ -58,6 +58,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 6
+    #labels:
+    #  - com.centurylinklabs.watchtower.enable="false"
     network_mode: host
     ports:
       - "8123:8123"
@@ -109,8 +111,6 @@ services:
     restart: on-failure
     volumes:
       - /opt/node-red:/data
-      #- /usr/src/node-red:/usr/src/node-red
-      #- /usr/bin:/usr/local/bin
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
 
@@ -206,3 +206,11 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /opt/watchtower/config.json:/config.json:ro
+
+  airconnect:
+    image: swilsonau/docker-airconnect
+    container_name: airconnect
+    restart: on-failure
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/airconnect:/airconnect
