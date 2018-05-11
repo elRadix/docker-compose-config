@@ -38,6 +38,7 @@ services:
       retries: 24
     network_mode: host
     ports:
+      - 8083:8083
       - 8086:8086
     restart: on-failure
     volumes:
@@ -45,8 +46,9 @@ services:
       - /opt/influxdb:/var/lib/influxdb
 
   homeassistant:
+    #image: homeassistant/home-assistant
+    image: homeassistant/home-assistant:rc
     #image: homeassistant/home-assistant:dev
-    image: homeassistant/home-assistant
     container_name: home-assistant
     depends_on:
       influxdb:
@@ -70,8 +72,9 @@ services:
       - /etc/localtime:/etc/localtime:ro
 
   hass_playground:
+    #image: homeassistant/home-assistant
+    image: homeassistant/home-assistant:rc
     #image: homeassistant/home-assistant:dev
-    image: homeassistant/home-assistant
     container_name: hass_playground
     depends_on:
       influxdb:
@@ -165,20 +168,28 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /opt/dockermon:/config
 
-  #appdaemon:
-  #  container_name: homeassistant_appdaemon
-  #  image: acockburn/appdaemon:latest
-  #  depends_on:
-  #    - homeassistant
-  #  links:
+  appdaemon:
+    image: acockburn/appdaemon
+    #image: acockburn/appdaemon:dev
+    container_name: appdaemon
+    depends_on:
+      - homeassistant
+    environment:
+      - HA_URL="https://home.brianhanifin.com"
+      - HA_KEY="/etc/letsencrypt/live/home.brianhanifin.com-0001/privkey.pem"
+      #- DASH_URL="DASH_URL"
+    links:
       # Link ports from home-assistant container
-  #    - homeassistant
-  #  ports:
-  #    - 5050:5050
-  #  restart: on-failure
-  #  volumes:
-  #    - /opt/appdaemon:/conf
-  #    - /etc/localtime:/etc/localtime:ro
+      - homeassistant
+    #network_mode: bridge
+    ports:
+      - 5050:5050
+    restart: on-failure
+    volumes:
+      - /opt/appdaemon:/conf
+      - /etc/letsencrypt/live/home.brianhanifin.com-0001/:/certs:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /etc/localtime:/etc/localtime:ro
 
   unifi:
     image: jacobalberty/unifi:latest
