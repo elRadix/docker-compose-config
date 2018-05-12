@@ -174,10 +174,6 @@ services:
     container_name: appdaemon
     depends_on:
       - homeassistant
-    environment:
-      - HA_URL="https://home.brianhanifin.com"
-      - HA_KEY="/etc/letsencrypt/live/home.brianhanifin.com-0001/privkey.pem"
-      #- DASH_URL="DASH_URL"
     links:
       # Link ports from home-assistant container
       - homeassistant
