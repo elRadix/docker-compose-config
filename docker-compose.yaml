@@ -24,6 +24,7 @@ services:
     ports:
       - 3000:3000
     restart: on-failure
+    user: "1000:1000"
     volumes:
       - /opt/grafana:/etc/grafana:rw
       - /opt/grafana:/var/lib/grafana:rw
@@ -95,28 +96,6 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /etc/localtime:/etc/localtime:ro
 
-  node-red:
-    #image: nodered/node-red-docker
-    image: machinedata/node-red
-    container_name: node-red
-    depends_on:
-      mosquitto:
-        condition: service_started
-      homeassistant:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1:1880"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-    ports:
-      - 1880:1880
-    restart: on-failure
-    volumes:
-      - /opt/node-red:/data
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
-
   mosquitto:
     image: eclipse-mosquitto
     container_name: mosquitto
@@ -128,6 +107,38 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /opt/mosquitto:/mosquitto/config:ro
       - /opt/mosquitto:/mosquitto/data
+
+  nodered:
+    #image: nodered/node-red-docker:slim
+    image: nodered/node-red-docker:v8
+    #image: nodered/node-red-docker:latest-v8
+    #image: machinedata/node-red
+    #image: philipkazmeier/node-red-homeassistant
+    container_name: nodered
+    depends_on:
+      mosquitto:
+        condition: service_started
+      homeassistant:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:1880"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    links:
+      # Link ports from home-assistant container
+      - homeassistant
+    ports:
+      - 1880:1880
+      - 9229:9229
+    restart: on-failure
+    user: root
+    volumes:
+      - /opt/nodered:/data
+      - /etc/letsencrypt/live/home.brianhanifin.com-0001/:/certs:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
 
   portainer:
     image: portainer/portainer
@@ -180,6 +191,7 @@ services:
     #network_mode: bridge
     ports:
       - 5050:5050
+      - 5001:5001
     restart: on-failure
     volumes:
       #- /opt/appdaemon:/conf
