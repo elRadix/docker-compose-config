@@ -3,6 +3,8 @@ services:
 
   nginx:
     container_name: nginx
+    environment:
+      - TZ=America/Los_Angeles # offset = -08:00 / DST -07:00
     image: nginx
     ports:
        - 80:80
@@ -21,6 +23,8 @@ services:
     depends_on:
       influxdb:
         condition: service_healthy
+    environment:
+      - TZ=America/Los_Angeles # offset = -08:00 / DST -07:00
     ports:
       - 3000:3000
     restart: on-failure
@@ -32,6 +36,8 @@ services:
   influxdb:
     image: influxdb
     container_name: influxdb
+    environment:
+      - TZ=America/Los_Angeles # offset = -08:00 / DST -07:00
     healthcheck:
       test: ["CMD", "curl", "-sI", "http://127.0.0.1:8086/ping"]
       interval: 30s
@@ -48,6 +54,7 @@ services:
 
   homeassistant:
     image: homeassistant/home-assistant
+    #image: homeassistant/home-assistant:0.69.1
     #image: homeassistant/home-assistant:rc
     #image: homeassistant/home-assistant:dev
     container_name: home-assistant
@@ -56,6 +63,8 @@ services:
         condition: service_healthy
       mosquitto:
         condition: service_started
+    environment:
+      - TZ=America/Los_Angeles # offset = -08:00 / DST -07:00
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:8123"]
       interval: 30s
@@ -82,6 +91,8 @@ services:
         condition: service_healthy
       mosquitto:
         condition: service_started
+    environment:
+      - TZ=America/Los_Angeles # offset = -08:00 / DST -07:00
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:8123"]
       interval: 30s
@@ -99,10 +110,12 @@ services:
   mosquitto:
     image: eclipse-mosquitto
     container_name: mosquitto
-    user: "1000:1000"
+    environment:
+      - TZ=America/Los_Angeles # offset = -08:00 / DST -07:00
     ports:
       - 1883:1883
     restart: on-failure
+    user: "1000:1000"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /opt/mosquitto:/mosquitto/config:ro
@@ -120,6 +133,8 @@ services:
         condition: service_started
       homeassistant:
         condition: service_healthy
+    environment:
+      - TZ=America/Los_Angeles # offset = -08:00 / DST -07:00
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:1880"]
       interval: 30s
@@ -143,6 +158,8 @@ services:
   portainer:
     image: portainer/portainer
     container_name: portainer
+    environment:
+      - TZ=America/Los_Angeles # offset = -08:00 / DST -07:00
     ports:
       - 9000:9000
     restart: on-failure
@@ -156,6 +173,7 @@ services:
   #  environment:
   #    - PGID=1000
   #    - PUID=1000
+  #    - TZ=America/Los_Angeles # offset = -08:00 / DST -07:00
   #  healthcheck:
   #    test: ["CMD", "curl", "-f", "http://127.0.0.1"]
   #    interval: 30s
@@ -169,9 +187,23 @@ services:
   #    - /opt/organizr:/config:rw
   #    - /etc/letsencrypt:/etc/letsencrypt:ro
 
+  #esphomeyaml:
+  #  image: ottowinter/esphomeyaml
+  #  container_name: esphomeyaml
+  #  environment:
+  #    - TZ=America/Los_Angeles # offset = -08:00 / DST -07:00
+  #  ports:
+  #    - 6123:6123
+  #  restart: on-failure
+  #  volumes:
+  #    - /var/run/docker.sock:/var/run/docker.sock
+  #    - /opt/esphomeyaml:/config
+
   dockermon:
     image: philhawthorne/ha-dockermon
     container_name: dockermon
+    environment:
+      - TZ=America/Los_Angeles # offset = -08:00 / DST -07:00
     ports:
       - 8126:8126
     restart: on-failure
@@ -185,6 +217,13 @@ services:
     container_name: appdaemon
     depends_on:
       - homeassistant
+    environment:
+      - TZ=America/Los_Angeles # offset = -08:00 / DST -07:00
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:5050"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     links:
       # Link ports from home-assistant container
       - homeassistant
@@ -203,10 +242,10 @@ services:
 
   unifi:
     image: jacobalberty/unifi:latest
-    container_name: "unifi"
+    container_name: unifi
     environment:
-      - TZ=America/Los_Angeles
-    network_mode: "host"
+      - TZ=America/Los_Angeles # offset = -08:00 / DST -07:00
+    network_mode: host
     ports:
       - 3478:3478/udp
       - 10001:10001/udp
@@ -219,19 +258,35 @@ services:
     volumes:
       - /opt/unifi/data:/unifi/data
 
-  watchtower:
-    image: v2tec/watchtower
-    container_name: watchtower
-    command: --cleanup --label-enable
-    restart: on-failure
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /opt/watchtower/config.json:/config.json:ro
+  #watchtower:
+  #  image: v2tec/watchtower
+  #  container_name: watchtower
+  #  command: --cleanup --label-enable
+  #  environment:
+  #    - TZ=America/Los_Angeles # offset = -08:00 / DST -07:00
+  #  restart: on-failure
+  #  volumes:
+  #    - /var/run/docker.sock:/var/run/docker.sock
+  #    - /opt/watchtower/config.json:/config.json:ro
 
-  airconnect:
-    image: swilsonau/docker-airconnect
-    container_name: airconnect
+  #airconnect:
+  #  image: swilsonau/docker-airconnect
+  #  container_name: airconnect
+  #  environment:
+  #    - TZ=America/Los_Angeles # offset = -08:00 / DST -07:00
+  #  restart: on-failure
+  #  volumes:
+  #    - /var/run/docker.sock:/var/run/docker.sock
+  #    - /opt/airconnect:/airconnect
+
+  tasmoadmin:
+    image: raymondmm/tasmoadmin
+    container_name: tasmoadmin
+    environment:
+      - TZ=America/Los_Angeles # offset = -08:00 / DST -07:00
+    ports:
+      - 9999:80/tcp
     restart: on-failure
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /opt/airconnect:/airconnect
+      - /opt/tasmoadmin:/data
